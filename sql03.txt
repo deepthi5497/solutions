@@ -1,0 +1,103 @@
+create table movie(mID integer(4),title varchar(30),year integer,director varchar(30));
+insert into movie values(101,'Gone with the wind',1939,'Victor Fleming');
+insert into movie values(102,'Star Wars',1977,'George Lucas');
+insert into movie values(103,'The Sound of Music',1965,'Robert Wise');
+insert into movie values(104,'E.T',1982,'Steven Spielberg');
+insert into movie values(105,'Titanic',1997,'James Cameron');
+insert into movie values(106,'Snow White',1937,null);
+insert into movie values(108,'Raiders of the Lost Ark',1981,'Steven Spielberg');
+
+create table reviewer(rid integer(5),name varchar(30));
+
+insert into reviewer values(201,'Sarah Martinez');
+insert into reviewer values(202,'Daniel Lewis');
+insert into reviewer values(203,'Brittany Harris'),(204,'Mike Anderson'),(205,'Chris Jackson');
+insert into reviewer values(206,'Elizabeth Thomas'),(207,'James Cameron'),(208,'Ashley White');
+
+
+create table rating(rid integer(5),mid integer(5),stars integer(1),ratingDate date);
+insert into rating values(201,101,2,'2011-01-22'),(201,101,4,'2011-01-27');
+insert into rating values(202,106,4,null);
+insert into rating values(203,103,2,'2011-01-20');
+insert into rating values(203,108,4,'2011-01-12');
+insert into rating values(203,108,2,'2011-01-30');
+insert into rating values(204,101,3,'2011-01-09');
+insert into rating values(205,103,3,'2011-01-27');
+insert into rating values(205,104,2,'2011-01-22');
+insert into rating values(205,108,4,null);
+insert into rating values(206,107,3,'2011-01-15');
+insert into rating values(206,106,5,'2011-01-19');
+insert into rating values(207,107,5,'2011-01-20');
+insert into rating values(208,104,3,'2011-01-02');
+
+1)select title from movie where director='Steven Spielberg';
++-------------------------+
+| title                   |
++-------------------------+
+| E.T                     |
+| Raiders of the Lost Ark |
++-------------------------+
+2 rows in set (0.00 sec)
+2)select year,title from movie where mid in(select mid from rating where stars in(4,5))order by year;
++------+-------------------------+
+| year | title                   |
++------+-------------------------+
+| 1937 | Snow White              |
+| 1939 | Gone with the wind      |
+| 1981 | Raiders of the Lost Ark |
+| 2009 | Avatar                  |
++------+-------------------------+
+4 rows in set (0.04 sec)
+3)select title from movie where mid not in(select distinct(mid) from rating);
++-----------+
+| title     |
++-----------+
+| Star Wars |
+| Titanic   |
++-----------+
+2 rows in set (0.00 sec)
+4)select name from reviewer where rid in(select rid from rating where ratingdate is NULL);
++---------------+
+| name          |
++---------------+
+| Daniel Lewis  |
+| Chris Jackson |
++---------------+
+2 rows in set (0.01 sec)
+5) select r.name,rg.stars,rg.ratingdate,m.title from reviewer r join rating rg on r.rid=rg.rid join movie m on rg.mid=m.mid order by name,title,stars;
++------------------+-------+------------+-------------------------+
+| name             | stars | ratingdate | title                   |
++------------------+-------+------------+-------------------------+
+| Ashley White     |     3 | 2011-01-02 | E.T                     |
+| Brittany Harris  |     2 | 2011-01-30 | Raiders of the Lost Ark |
+| Brittany Harris  |     4 | 2011-01-12 | Raiders of the Lost Ark |
+| Brittany Harris  |     2 | 2011-01-20 | The Sound of Music      |
+| Chris Jackson    |     2 | 2011-01-22 | E.T                     |
+| Chris Jackson    |     4 | NULL       | Raiders of the Lost Ark |
+| Chris Jackson    |     3 | 2011-01-27 | The Sound of Music      |
+| Daniel Lewis     |     4 | NULL       | Snow White              |
+| Elizabeth Thomas |     3 | 2011-01-15 | Avatar                  |
+| Elizabeth Thomas |     5 | 2011-01-19 | Snow White              |
+| James Cameron    |     5 | 2011-01-20 | Avatar                  |
+| Mike Anderson    |     3 | 2011-01-09 | Gone with the wind      |
+| Sarah Martinez   |     2 | 2011-01-22 | Gone with the wind      |
+| Sarah Martinez   |     4 | 2011-01-27 | Gone with the wind      |
++------------------+-------+------------+-------------------------+
+6)select r1.rid,r1.mid,rr.name  from rating r1 join rating r2 on r1.rid=r2.rid and r1.mid=r2.mid join reviewer rr on rr.rid=r1.rid where r1.stars<r2.stars and r1.ratingdate<r2.ratingdate;
++------+------+----------------+
+| rid  | mid  | name           |
++------+------+----------------+
+|  201 |  101 | Sarah Martinez |
++------+------+----------------+
+1 row in set (0.00 sec)
+10)select r.name,rg.stars,m.title  from reviewer r join rating rg on r.rid=rg.rid join movie m on m.mid=rg.mid where title='Gone with the wind' ;
++----------------+-------+--------------------+
+| name           | stars | title              |
++----------------+-------+--------------------+
+| Sarah Martinez |     2 | Gone with the wind |
+| Sarah Martinez |     4 | Gone with the wind |
+| Mike Anderson  |     3 | Gone with the wind |
++----------------+-------+--------------------+
+
+
+
