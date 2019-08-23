@@ -90,6 +90,7 @@ insert into rating values(208,104,3,'2011-01-02');
 |  201 |  101 | Sarah Martinez |
 +------+------+----------------+
 1 row in set (0.00 sec)
+7)
 10)select r.name,rg.stars,m.title  from reviewer r join rating rg on r.rid=rg.rid join movie m on m.mid=rg.mid where title='Gone with the wind' ;
 +----------------+-------+--------------------+
 | name           | stars | title              |

@@ -119,7 +119,7 @@ Records: 0  Duplicates: 0  Warnings: 1
 | Tim  | Radish | 2012-07-16 |     23 |
 +------+--------+------------+--------+
 2 rows in set (0.56 sec)
-9)mysql> select distinct g.name from gardener g join picked pi on g.gardenerid=pi.gardenerfk join planted p on pi.plantfk=p.plantfk where pi.gardenerfk=p.gardenerfk and pi.locationfk=p.locationfk;
+9)mysql> select name from gardener where gardenerid in(select distinct pt.gardenerfk from planted pt join picked pk where pk.gardenerfk=pt.gardenerfk and pk.locationfk=pt.locationfk);
 +--------+
 | name   |
 +--------+
@@ -127,5 +127,6 @@ Records: 0  Duplicates: 0  Warnings: 1
 | Tim    |
 | Erin   |
 +--------+
-3 rows in set (0.00 sec)
+3 rows in set (0.03 sec)
+
 10)
