@@ -1,0 +1,162 @@
+1)mysql>  select d.dept_id,dept_name,coalesce(sum(emp_sal),0) from department d left join employee e on d.dept_id=e.dept_id group by dept_name;
++---------+-----------+--------------------------+
+| dept_id | dept_name | coalesce(sum(emp_sal),0) |
++---------+-----------+--------------------------+
+|       1 | it        |                     9000 |
+|       2 | admin     |                    11000 |
+|       4 | hr        |                        0 |
++---------+-----------+--------------------------+
+3 rows in set (0.00 sec)
+2)mysql>  select e.dept_id,coalesce(dept_name,'others'),sum(emp_sal) from employee e left join department d on d.dept_id=e.dept_id group by dept_id;
++---------+------------------------------+--------------+
+| dept_id | coalesce(dept_name,'others') | sum(emp_sal) |
++---------+------------------------------+--------------+
+|       1 | it                           |         9000 |
+|       2 | admin                        |        11000 |
+|       3 | others                       |         7000 |
++---------+------------------------------+--------------+
+3 rows in set (0.00 sec)
+
+3)create table employee3(emp_id int,emp_name varchar(10),manager_id int,salary int);
+
+insert into employee3 values(1,'vivek',8,11000);
+insert into employee3 values(2,'raj',1,2000);
+insert into employee3 values(3,'vinoth',1,3000);
+insert into employee3 values(4,'abhishek',2,5000);
+insert into employee3 values(5,'divya',3,6000);
+insert into employee3 values(6,'chitra',3,2350);
+insert into employee3 values(7,'devi',3,2500);
+insert into employee3 values(8,'aarthi',4,2700);
+
+mysql> select emp_id,emp_name,manager_id,salary from employee3 where salary>=2700 and salary<=10000;
++--------+----------+------------+--------+
+| emp_id | emp_name | manager_id | salary |
++--------+----------+------------+--------+
+|      3 | vinoth   |          1 |   3000 |
+|      4 | abhishek |          2 |   5000 |
+|      5 | divya    |          3 |   6000 |
+|      8 | aarthi   |          4 |   2700 |
++--------+----------+------------+--------+
+4 rows in set (0.00 sec)
+
+4)select e1.manager_id,e2.emp_name,sum(e1.salary) from employee3 e1 join employee3 e2 on e1.manager_id=e2.emp_id group by e1.manager_id;
++------------+----------+----------------+
+| manager_id | emp_name | sum(e1.salary) |
++------------+----------+----------------+
+|          1 | vivek    |           5000 |
+|          2 | raj      |           5000 |
+|          3 | vinoth   |          10850 |
+|          4 | abhishek |           2700 |
+|          8 | aarthi   |          11000 |
++------------+----------+----------------+
+5 rows in set (0.00 sec)
+mysql> select emp_id,substr(emp_name,4) as derv_emp_name from employee5;
++--------+-----------------+
+| emp_id | derv_emp_name   |
++--------+-----------------+
+|      1 | eshkumar        |
+|      2 | ayaraja         |
+|      3 | ishek           |
+|      4 | eskkumar        |
+|      5 | ayaprakashsingh |
+|      6 | yashree         |
++--------+-----------------+
+6 rows in set (0.00 sec)
+6)mysql> select emp_id,substr(emp_name,locate('h',emp_name)+1,length(emp_name)) as derv_emp_name from employee5;
++--------+---------------+
+| emp_id | derv_emp_name |
++--------+---------------+
+|      1 | kumar         |
+|      2 | ayaraja       |
+|      3 | ishek         |
+|      4 | mukeskkumar   |
+|      5 | singh         |
+|      6 | ree           |
++--------+---------------+
+6 rows in set (0.03 sec)
+7)select emp_id,emp_name,salary from employee3 e1 where 1=(select count(distinct salary) from employee3 e2 where e1.salary<e2.salary);
++--------+----------+--------+
+| emp_id | emp_name | salary |
++--------+----------+--------+
+|      5 | divya    |   6000 |
++--------+----------+--------+
+1 row in set (0.00 sec)
+8)mysql> select emp_id,emp_name,manager_id,salary from(select emp_id,emp_name,manager_id,salary,row_number() over (order by salary desc)as s from employee3)as a where s<=3;
++--------+----------+------------+--------+
+| emp_id | emp_name | manager_id | salary |
++--------+----------+------------+--------+
+|      1 | vivek    |          8 |  11000 |
+|      5 | divya    |          3 |   6000 |
+|      4 | abhishek |          2 |   5000 |
++--------+----------+------------+--------+
+3 rows in set (0.00 sec)
+9)
+create table employee9(emp_id int,emp_name varchar(20),dept_name varchar(10),salary int);
+
+insert into employee9 values(1,'vivek','it',2000);
+insert into employee9 values(2,'raj','admin',3500);
+insert into employee9 values(3,'vinoth','hr',4800);
+insert into employee9 values(4,'abhishek','it',5700);
+insert into employee9 values(5,'divya','ites',3000);
+insert into employee9 values(6,'chitra','hr',5800);
+insert into employee9 values(7,'devi','admin',3200);
+
+
+mysql> select emp_id,emp_name,dept_name,salary from employee9 where salary>3000 and dept_name='it' or salary>3400 and dept_name='admin';
++--------+----------+-----------+--------+
+| emp_id | emp_name | dept_name | salary |
++--------+----------+-----------+--------+
+|      2 | raj      | admin     |   3500 |
+|      4 | abhishek | it        |   5700 |
++--------+----------+-----------+--------+
+2 rows in set (0.00 sec)
+
+select * from
+(select  emp_id,emp_name,dept_name,case
+ when salary>3000 and dept_name='IT' then salary
+ when salary>3400 and dept_name='Admin' then salary
+else null 
+end as sal
+from employee9) as A
+where sal is not null;
+
+10)mysql> select emp_id,emp_name,dept_name,salary from employee10 where emp_name like'%j%';
++--------+------------+-----------+--------+
+| emp_id | emp_name   | dept_name | salary |
++--------+------------+-----------+--------+
+|      1 | rajesh     | it        |   2000 |
+|      2 | ajay kumar | admin     |   3500 |
+|      5 | balaji     | ites      |   3000 |
++--------+------------+-----------+--------+
+3 rows in set (0.00 sec)
+
+11)mysql> select emp_id,emp_name,dept_name,salary from employee10 where emp_name like'%j%' or emp_name like '%n%' or emp_name like '%m%';
++--------+------------+-----------+--------+
+| emp_id | emp_name   | dept_name | salary |
++--------+------------+-----------+--------+
+|      1 | rajesh     | it        |   2000 |
+|      2 | ajay kumar | admin     |   3500 |
+|      4 | vivekkumar | it        |   5700 |
+|      5 | balaji     | ites      |   3000 |
+|      6 | raveendar  | hr        |   5800 |
+|      7 | poornarao  | admin     |   3200 |
++--------+------------+-----------+--------+
+6 rows in set (0.00 sec)
+
+12)mysql> select emp_id,emp_name,dept_name,salary from employee10 where emp_name like'%b%' and emp_name like '%h%' and emp_name like '%e%';
++--------+----------+-----------+--------+
+| emp_id | emp_name | dept_name | salary |
++--------+----------+-----------+--------+
+|      3 | abhishek | hr        |   4800 |
++--------+----------+-----------+--------+
+1 row in set (0.00 sec)
+
+
+mysql> select emp_id,emp_name,dept_name,salary from employee10 where emp_name like'%b%h%e%';
++--------+----------+-----------+--------+
+| emp_id | emp_name | dept_name | salary |
++--------+----------+-----------+--------+
+|      3 | abhishek | hr        |   4800 |
++--------+----------+-----------+--------+
+1 row in set (0.00 sec)
+
