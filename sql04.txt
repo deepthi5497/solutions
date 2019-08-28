@@ -87,7 +87,13 @@ insert into likes values(1316 ,1304);
 | Jessica   |
 +-----------+
 5 rows in set (0.00 sec)
-2)
+2)mysql> select h1.name,h1.grade,h2.name,h2.grade from likes l join highschooler h1 on h1.id=l.id1 join highschooler h2 on h2.id=l.id2 where (h1.grade-h2.grade)>=2;
++------+-------+-------+-------+
+| name | grade | name  | grade |
++------+-------+-------+-------+
+| John |    12 | Haley |    10 |
++------+-------+-------+-------+
+1 row in set (0.30 sec)
 3)mysql> select name,grade from highschooler where id in(select l1.id2 from likes l1 join likes l2  on l1.id1=l2.id2 and l1.id2=l2.id1)group by name,grade order by name ;
 +-----------+-------+
 | name      | grade |
@@ -107,6 +113,49 @@ insert into likes values(1316 ,1304);
 | Logan   |    12 |
 +---------+-------+
 3 rows in set (0.00 sec)
+5)mysql> select h1.name,h1.grade,h2.name,h2.grade from likes l join highschooler h1 on l.id1=h1.id join highschooler h2 on l.id2=h2.id and l.id2 not in(select id1 from likes);
++----------+-------+--------+-------+
+| name     | grade | name   | grade |
++----------+-------+--------+-------+
+| Alexis   |    11 | Kris   |    10 |
+| Brittany |    10 | Kris   |    10 |
+| Alustin  |    11 | Jordan |    12 |
+| John     |    12 | Haley  |    10 |
++----------+-------+--------+-------+
+4 rows in set (0.05 sec)
+6)mysql> select h1.name,h1.grade,h2.name,h2.grade from friend f join highschooler h1 on f.id1=h1.id join highschooler h2 on f.id2=h2.id where h1.grade=h2.grade order by h1.grade,h1.name;
++-----------+-------+-----------+-------+
+| name      | grade | name      | grade |
++-----------+-------+-----------+-------+
+| Cassandra |     9 | Gabriel   |     9 |
+| Gabriel   |     9 | Cassandra |     9 |
+| Gabriel   |     9 | Jordan    |     9 |
+| Jordan    |     9 | Tiffany   |     9 |
+| Jordan    |     9 | Gabriel   |     9 |
+| Tiffany   |     9 | Jordan    |     9 |
+| Andrew    |    10 | Kris      |    10 |
+| Brittany  |    10 | Kris      |    10 |
+| Brittany  |    10 | Haley     |    10 |
+| Haley     |    10 | Brittany  |    10 |
+| Haley     |    10 | Kris      |    10 |
+| Kris      |    10 | Haley     |    10 |
+| Kris      |    10 | Brittany  |    10 |
+| Kris      |    10 | Andrew    |    10 |
+| Alexis    |    11 | Gabriel   |    11 |
+| Alexis    |    11 | Jessica   |    11 |
+| Gabriel   |    11 | Jessica   |    11 |
+| Gabriel   |    11 | Alexis    |    11 |
+| Jessica   |    11 | Alexis    |    11 |
+| Jessica   |    11 | Gabriel   |    11 |
+| John      |    12 | Logan     |    12 |
+| Jordan    |    12 | Logan     |    12 |
+| Jordan    |    12 | Kyle      |    12 |
+| Kyle      |    12 | Jordan    |    12 |
+| Logan     |    12 | John      |    12 |
+| Logan     |    12 | Jordan    |    12 |
++-----------+-------+-----------+-------+
+26 rows in set (0.03 sec)
+7)
 8)mysql> select count(name)-count(distinct name) as diff from highschooler;
 +------+
 | diff |
@@ -122,6 +171,27 @@ insert into likes values(1316 ,1304);
 | Cassandra |     9 |
 +-----------+-------+
 2 rows in set (0.03 sec)
+10)
+11)mysql> select f.id1,h1.name,h1.grade,f.id2,h2.name,h2.grade from friend f join highschooler h1 on f.id1=h1.id join highschooler h2 on f.id2=h2.id where h1.grade<>h2.grade;
++------+-----------+-------+------+-----------+-------+
+| id1  | name      | grade | id2  | name      | grade |
++------+-----------+-------+------+-----------+-------+
+| 1247 | Alexis    |    11 | 1381 | Tiffany   |     9 |
+| 1247 | Alexis    |    11 | 1709 | Cassandra |     9 |
+| 1304 | Jordan    |    12 | 1782 | Andrew    |    10 |
+| 1316 | Alustin   |    11 | 1934 | Kyle      |    12 |
+| 1316 | Alustin   |    11 | 1782 | Andrew    |    10 |
+| 1381 | Tiffany   |     9 | 1247 | Alexis    |    11 |
+| 1501 | Jessica   |    11 | 1934 | Kyle      |    12 |
+| 1689 | Gabriel   |     9 | 1782 | Andrew    |    10 |
+| 1709 | Cassandra |     9 | 1247 | Alexis    |    11 |
+| 1782 | Andrew    |    10 | 1316 | Alustin   |    11 |
+| 1782 | Andrew    |    10 | 1304 | Jordan    |    12 |
+| 1782 | Andrew    |    10 | 1689 | Gabriel   |     9 |
+| 1934 | Kyle      |    12 | 1501 | Jessica   |    11 |
+| 1934 | Kyle      |    12 | 1316 | Alustin   |    11 |
++------+-----------+-------+------+-----------+-------+
+14 rows in set (0.00 sec)
 12)mysql> select avg(stu) as avg_friend from (select count(*)as stu from friend group by id1) stu1;
 +------------+
 | avg_friend |
@@ -129,3 +199,12 @@ insert into likes values(1316 ,1304);
 |     2.5000 |
 +------------+
 1 row in set (0.00 sec)
+13)
+14)mysql> select * from (select name,grade,dense_rank() over(order by friends desc) as rank_stu from (select f.id1,h.name,count(id2) as friends,h.grade from highschooler h left join friend f on f.id1=h.id group by f.id1)rank1)rank2 where rank_stu=1;
++--------+-------+----------+
+| name   | grade | rank_stu |
++--------+-------+----------+
+| Alexis |    11 |        1 |
+| Andrew |    10 |        1 |
++--------+-------+----------+
+2 rows in set (0.16 sec)
