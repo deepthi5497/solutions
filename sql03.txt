@@ -226,7 +226,15 @@ mysql> select m1.title,m2.director from movie m1 join movie m2 on m1.director=m2
 |    4.5000 | Snow White |
 +-----------+------------+
 1 row in set (0.10 sec)
-20)
+20)mysql> select title,avg(stars) from rating r join movie m on r.mid=m.mid group by title having avg(stars) =
+    ->  (select min(s1.a) from (select avg(stars) a,rt.mid,m.title from rating rt join movie m on rt.mid=m.mid group by mid order by a asc)as s1);
++--------------------+------------+
+| title              | avg(stars) |
++--------------------+------------+
+| The Sound of Music |     2.5000 |
+| E.T                |     2.5000 |
++--------------------+------------+
+2 rows in set (0.34 sec)
 21)mysql> select m.director,m.title,max(r.stars) from movie m join rating r on m.mid=r.mid where m.director is not null group by m.director having max(stars) in
     -> (select max(stars) from rating r join movie m on m.mid=r.mid group by m.director);
 +------------------+-------------------------+--------------+

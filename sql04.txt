@@ -155,7 +155,25 @@ insert into likes values(1316 ,1304);
 | Logan     |    12 | Jordan    |    12 |
 +-----------+-------+-----------+-------+
 26 rows in set (0.03 sec)
-7)
+7) select h1.name,h1.grade,h2.name,h2.grade,h3.name,h3.grade from likes l left join friend f on l.id1=f.id1 and l.id2=f.id2 join friend f1
+    ->  on l.id1=f1.id1
+    ->  join friend f2
+    ->  on l.id2=f2.id1
+    ->  join highschooler h1
+    ->  on l.id1=h1.id
+    ->  join highschooler h2
+    ->  on l.id2=h2.id
+    ->  join highschooler h3
+    ->  on f1.id2=h3.id
+    ->  where f.id1 is null and f.id2 is null and f1.id2=f2.id2;
++---------+-------+-----------+-------+---------+-------+
+| name    | grade | name      | grade | name    | grade |
++---------+-------+-----------+-------+---------+-------+
+| Andrew  |    10 | Cassandra |     9 | Gabriel |     9 |
+| Alustin |    11 | Jordan    |    12 | Kyle    |    12 |
+| Alustin |    11 | Jordan    |    12 | Andrew  |    10 |
++---------+-------+-----------+-------+---------+-------+
+3 rows in set (0.25 sec)
 8)mysql> select count(name)-count(distinct name) as diff from highschooler;
 +------+
 | diff |
@@ -171,7 +189,14 @@ insert into likes values(1316 ,1304);
 | Cassandra |     9 |
 +-----------+-------+
 2 rows in set (0.03 sec)
-10)
+10)mysql> select h1.name,h1.grade,h2.name,h2.grade,h3.name,h3.grade from likes l1 join likes l2 on l1.id2=l2.id1 and l1.id1<>l2.id2 join highschooler h1 on l1.id1=h1.id join highschooler h2 on l1.id2=h2.id join highschooler h3 on l2.id2=h3.id;
++---------+-------+-----------+-------+---------+-------+
+| name    | grade | name      | grade | name    | grade |
++---------+-------+-----------+-------+---------+-------+
+| Andrew  |    10 | Cassandra |     9 | Gabriel |     9 |
+| Gabriel |    11 | Alexis    |    11 | Kris    |    10 |
++---------+-------+-----------+-------+---------+-------+
+2 rows in set (0.00 sec)
 11)mysql> select f.id1,h1.name,h1.grade,f.id2,h2.name,h2.grade from friend f join highschooler h1 on f.id1=h1.id join highschooler h2 on f.id2=h2.id where h1.grade<>h2.grade;
 +------+-----------+-------+------+-----------+-------+
 | id1  | name      | grade | id2  | name      | grade |
@@ -199,7 +224,6 @@ insert into likes values(1316 ,1304);
 |     2.5000 |
 +------------+
 1 row in set (0.00 sec)
-13)
 14)mysql> select * from (select name,grade,dense_rank() over(order by friends desc) as rank_stu from (select f.id1,h.name,count(id2) as friends,h.grade from highschooler h left join friend f on f.id1=h.id group by f.id1)rank1)rank2 where rank_stu=1;
 +--------+-------+----------+
 | name   | grade | rank_stu |
