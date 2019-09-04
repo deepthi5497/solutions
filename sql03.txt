@@ -208,7 +208,14 @@ insert into rating values(208,104,3,'2011-01-02');
 | Chris Jackson   |        3 |
 +-----------------+----------+
 2 rows in set (0.00 sec)
-18)
+18)mysql> select director,group_concat(title) from movie group by director having count(director)>1 order by director;
++------------------+-----------------------------+
+| director         | group_concat(title)         |
++------------------+-----------------------------+
+| James Cameron    | Titanic,Avatar              |
+| Steven Spielberg | E.T,Raiders of the Lost Ark |
++------------------+-----------------------------+
+2 rows in set (0.20 sec)
 mysql> select m1.title,m2.director from movie m1 join movie m2 on m1.director=m2.director and m1.title<>m2.title order by m2.director,m2.title;
 +-------------------------+------------------+
 | title                   | director         |

@@ -317,7 +317,21 @@ Empty set (0.05 sec)
 | Andy Jones  | London     |
 +-------------+------------+
 3 rows in set (0.00 sec)
-12)
+12)mysql> select A.m_name,inscnt,compcnt from ((select m_name,count(instrument)as inscnt from musician left join performer on m_no=perf_is join place on born_in=place_no where place_country='England' group by m_name) A left join (select m_name,count(cmpn_no) as compcnt from musician m left join composer c on m_no=comp_is left join has_composed on comp_no=cmpr_no join place p1 on born_in=place_no where place_country='Britain ' group by m_name) B on A.m_name=B.m_name);
++------------------+--------+---------+
+| m_name           | inscnt | compcnt |
++------------------+--------+---------+
+| Harriet Smithson |      2 |    NULL |
+| Theo Mengel      |      3 |    NULL |
+| Harry Forte      |      3 |    NULL |
+| Davis Heavan     |      3 |    NULL |
+| Alan Fluff       |      2 |    NULL |
+| James First      |      1 |    NULL |
+| Fred Bloggs      |      0 |    NULL |
+| Andy Jones       |      0 |    NULL |
+| James Steeple    |      0 |    NULL |
++------------------+--------+---------+
+9 rows in set (0.15 sec)
 13)mysql> select band_name,band_contact,m.m_name,conducted_by,m1.m_name from band b join performance p on band_no=gave join concert c on concert_no=performed_in join musician m on m.m_no=band_contact join musician m1 on m1.m_no=conducted_by where concert_venue='Royal Albert Hall';
 +--------------------+--------------+-------------+--------------+------------+
 | band_name          | band_contact | m_name      | conducted_by | m_name     |
@@ -325,7 +339,31 @@ Empty set (0.05 sec)
 | Someday Loves this |            6 | Theo Mengel |           14 | Alan Fluff |
 +--------------------+--------------+-------------+--------------+------------+
 1 row in set (0.04 sec)
-14)
+14)mysql> select * from (select m2.m_name,case when p1.place_town="glasgow" then "born_in" end as status from musician m2 join place p1 on m2.born_in=p1.place_no)mov where status is not null
+    -> union
+    -> select * from (select m1.m_name,case when p1.place_town='Glasgow' then "LIVING_IN" end as status from musician m1 join place p1 on m1.living_in=p1.place_no)mov where status is not null
+    -> union
+    -> select * from (select m2.m_name,case when place_town='Glasgow' then "IN_BAND_IN" end as status from band b1 join place p1 on b1.band_home=p1.place_no join plays_in p2 on b1.band_no=p2.band_id join performer p3 on p3.perf_no = p2.player join musician m2 on m2.m_no=p3.perf_is)mov where status is not null;
++------------------+------------+
+| m_name           | status     |
++------------------+------------+
+| Lovely Time      | born_in    |
+| Louise Simpson   | born_in    |
+| Steven Chaytors  | born_in    |
+| Harriet Smithson | LIVING_IN  |
+| Jeff Dawn        | LIVING_IN  |
+| Andy Jones       | LIVING_IN  |
+| Louise Simpson   | LIVING_IN  |
+| James Steeple    | LIVING_IN  |
+| John Smith       | IN_BAND_IN |
+| Theo Mengel      | IN_BAND_IN |
+| Harry Forte      | IN_BAND_IN |
+| Jeff Dawn        | IN_BAND_IN |
+| Davis Heavan     | IN_BAND_IN |
+| James Quick      | IN_BAND_IN |
+| Elsie James      | IN_BAND_IN |
++------------------+------------+
+15 rows in set (0.05 sec)
 15)mysql> select m1.m_no,p1.band_id,b1.band_name from musician m1 join performer perf on perf_is=m_no join plays_in p1 on perf_no=player join band b1 on band_id=band_no where m1.m_name='Sue Little';
 +------+---------+-----------+
 | m_no | band_id | band_name |
